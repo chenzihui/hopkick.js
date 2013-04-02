@@ -2,32 +2,11 @@
 
 var should  = require( 'should' ),
     assert  = require( 'assert' ),
+    express = require( 'express' ),
     utils   = require( '../utils' ),
     hopkick = require( '../hopkick' );
 
-describe( 'Hopkick.js', function() {
-
-  it( 'should be able to be instantiated', function() {
-    should.exist( hopkick );
-  });
-
-  // it( 'should have a default set of configuration options', function() {
-  //   var opts = {
-  //     controllers: './controllers/',
-  //     postfix: 'Controller',
-  //     routes: './config/routes'
-  //   };
-
-  //   opts.should.eql( hopkick.config );
-  // });
-
-  it( 'should not expose it\'s map() function to the public', function() {
-    should.not.exist( hopkick.map );
-  });
-
-});
-
-describe( '._map()', function() {
+describe( '.map()', function() {
 
   var verb       = 'push',
       controller = 'main',
@@ -39,68 +18,132 @@ describe( '._map()', function() {
         app     = express();
 
     (function() {
-      hopkick._map( app, verb, path, controller, action );
+      hopkick.map( app, verb, path, controller, action );
     }).should.throwError( 'Invalid HTTP verb: push' );
   });
 
   it( 'should throw an error when it cannot load the controller specified', function() {
     var verb    = 'get',
         con     = controller + 'Controller',
-        express = require( 'express' ),
-        app     = express();;
+        app     = express();
+
+    var hopkick = require( '../hopkick' );
+
+    hopkick.init({
+      controllers: './example/controllers/',
+      postfix: 'Controller',
+      routes: './example/config/routes'
+    });
 
     (function() {
-      hopkick._map( app, verb, path, controller, action );
-    }).should.throwError( 'Cannot load controller ' + con + ' from ./controllers/' );
+      hopkick.map( app, verb, path, controller, action );
+    }).should.throwError( 'Cannot load controller ' + con + ' from ./example/controllers/' );
   });
 
   it( 'should throw an error when the action does not exist on the controller', function() {
     var verb       = 'get',
         controller = 'user',
-        express    = require( 'express' ),
         app        = express();
 
     hopkick.init({
-      controllers: './example/controllers/'
+      controllers: './example/controllers/',
+      postfix: 'Controller'
     });
 
     (function() {
-      hopkick._map( app, verb, path, controller, action );
+      hopkick.map( app, verb, path, controller, action );
     }).should.throwError( action + ' does not exist on ' + controller + 'Controller' );
+  });
+
+  it( 'should map a route to a controller\'s action', function() {
+    var hopkick = require( '../hopkick' ),
+        app     = express();
+
+    hopkick.init({
+      controllers: './example/controllers/',
+      postfix: 'Controller',
+      routes: './example/config/routes'
+    });
+
+    hopkick.map( app, 'get', '/', 'user', 'index' );
+
+    var routes = app.routes.get;
+
+    routes[0].path.should.equal( '/' );
+    routes[0].method.should.equal( 'get' );
   });
 
 });
 
 describe( '.init()', function() {
 
-  // it( 'should allow overriding of default options', function() {
-  //   hopkick.init({
-  //     controllers: './app/controllers',
-  //     routes: './routes/index'
-  //   });
+  it( 'should throw an error if configuration options are not passed in', function() {
+    (function() {
+      hopkick.init();
+    }).should.throwError( 'Config object not passed into init method' );
+  });
 
-  //   hopkick.config.should.eql({
-  //     controllers: './app/controllers',
-  //     postfix: 'Controller',
-  //     routes: './routes/index'
-  //   });
-  // });
+  it( 'should accept an object of configuration options', function() {
+    var hopkick = require( '../hopkick' );
+
+    hopkick.init({
+      controllers: './app/controllers',
+      postfix: 'Controller',
+      routes: './app/routes'
+    });
+
+    hopkick.config.should.eql({
+      controllers: './app/controllers',
+      postfix: 'Controller',
+      routes: './app/routes'
+    });
+  });
 
 });
 
 describe( '.mount()', function() {
+  var app = express();
 
   it( 'should throw an error when the route map is not found', function() {
-    var express = require( 'express' ),
-        app     = express();
+    var hopkick = require( '../hopkick' );
 
     hopkick.init({
-      routes: './example/config/router'
+      controllers: './example/controllers',
+      postfix: 'Controller',
+      routes: './example/router'
     });
 
     (function() {
       hopkick.mount( app );
     }).should.throwError( 'Route map not found!' );
+  });
+
+  it( 'should be populated with routes', function() {
+    var hopkick = require( '../hopkick' );
+
+    hopkick.init({
+      controllers: './example/controllers/',
+      postfix: 'Controller',
+      routes: './example/config/routes'
+    });
+
+    hopkick.mount( app );
+
+    var get  = app.routes.get,
+        post = app.routes.post;
+
+    get.should.have.length( 2 );
+
+    get[0].path.should.equal( '/' );
+    get[0].method.should.equal( 'get' );
+
+    get[1].path.should.equal( '/user' );
+    get[1].method.should.equal( 'get' );
+
+    post.should.have.length( 1 );
+
+    post[0].path.should.equal( '/user' );
+    post[0].method.should.equal( 'post' );
   });
 
 });

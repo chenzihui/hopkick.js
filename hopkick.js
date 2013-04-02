@@ -9,21 +9,6 @@ var utils   = require( './utils' );
 var hopkick = (function() {
 
   /*
-    Configuration object
-  */
-
-  var config = {
-    // Path where your controllers are stored in
-    controllers: './controllers/',
-
-    // Naming of your controller e.g. `UserController`
-    postfix: 'Controller',
-
-    // Location of your route map
-    routes: './config/routes'
-  };
-
-  /*
     Loads a controller from the specified path
     TODO: Can be expanded to load other types of files. E.g. `models`
 
@@ -59,7 +44,7 @@ var hopkick = (function() {
     @return none
   */
 
-  var _map = function( app, verb, path, controller, action ) {
+  var map = function( app, verb, path, controller, action ) {
     var allowedVerbs = [ 'get', 'post', 'put', 'delete' ],
         verb         = verb.toLowerCase(),
         con;
@@ -68,7 +53,7 @@ var hopkick = (function() {
       throw new Error( 'Invalid HTTP verb: ' + verb );
     }
 
-    con = _loadFile( controller, config.controllers, config.postfix );
+    con = _loadFile( controller, this.config.controllers, this.config.postfix );
 
     if ( !con[action] ) {
       throw new Error( action + ' does not exist on ' + controller + 'Controller' );
@@ -77,56 +62,72 @@ var hopkick = (function() {
     app[verb]( path, con[action] );
   };
 
+  /*
+    Mounts the router onto the route map specified
+
+    @param {Object} - Express application
+  */
+
+  var mount = function( app ) {
+    var routeMap, route, handler, method, controllerName, actionName;
+
+    try {
+      routeMap = require( this.config.routes );
+    } catch ( e ) {
+      throw new Error( 'Route map not found!' );
+    }
+
+    for ( route in routeMap ) {
+      handler = routeMap[ route ];
+
+      for ( method in handler ) {
+        controllerName = handler[method].split( '#' )[0];
+
+        actionName = handler[method].split( '#' )[1] ?
+            handler[method].split( '#' )[1] : 'index';
+
+        this.map( app, method, route, controllerName, actionName );
+      }
+    }
+  };
+
   return {
+
+    config: {},
 
     /*
       Initializes the router with configuration options
 
       @param {Object}
+
+      Example usage:
+
+      hopkick.init({
+        // Path to controllers
+        controllers: './app/controllers/',
+
+        // Postfix for controller files
+        postfix: 'Controller',
+
+        // Path to route map
+        routes: './app/routes'
+      });
     */
 
     init: function( opts ) {
-      config = opts ? utils.merge( config, opts ) : config;
+      if ( !opts ) {
+        throw new Error( 'Config object not passed into init method' );
+      }
+
+      this.config = opts;
     },
 
     /*
-      Mounts the router onto the route map specified
-
-      @param {Object} - Express application
+      Public API
     */
 
-    mount: function( app ) {
-      var routeMap, route, handler, method, controllerName, actionName;
-
-      try {
-        routeMap = require( config.routes );
-      } catch ( e ) {
-        throw new Error( 'Route map not found!' );
-      }
-
-      for ( route in routeMap ) {
-        handler = routeMap[ route ];
-
-        for ( method in handler ) {
-          controllerName = handler[method].split( '#' )[0];
-
-          actionName = handler[method].split( '#' )[1] ?
-              handler[method].split( '#' )[1] : 'index';
-
-          _map( app, method, route, controllerName, actionName );
-        }
-      }
-    },
-
-    /**
-     * Private API (For tests)
-     **/
-
-    _map: _map
-
-    /**
-     * End Private API
-     **/
+    map: map,
+    mount:mount
   };
 
 })();
