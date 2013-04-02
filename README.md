@@ -30,7 +30,7 @@ We can now express our routes as
       }
     };
 
-# Why create this?
+# TODO
 ------------------------------
 
-This is a side project for me to (re)experience TDD.
+This project is an exploration into Test Driven Development. The API interface will be constantly revised until it hits v1.0
