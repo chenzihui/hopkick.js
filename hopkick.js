@@ -4,11 +4,24 @@
  * Author: Chen Zihui <hello@chenzihui.com>
  **/
 
-var utils   = require( './utils' ),
-    express = require( 'express' ),
-    app     = express();
+var utils   = require( './utils' );
 
 var hopkick = (function() {
+
+  /*
+    Configuration object
+  */
+
+  var config = {
+    // Path where your controllers are stored in
+    controllers: './controllers/',
+
+    // Naming of your controller e.g. `UserController`
+    postfix: 'Controller',
+
+    // Location of your route map
+    routes: './config/routes'
+  };
 
   /*
     Loads a controller from the specified path
@@ -37,6 +50,7 @@ var hopkick = (function() {
   /*
     Maps the route to a controller's action
 
+    @param {Object} - Express app
     @param {String} - HTTP verb
     @param {String} - Route path
     @param {String} - Name of controller
@@ -45,7 +59,7 @@ var hopkick = (function() {
     @return none
   */
 
-  var _map = function( verb, path, controller, action ) {
+  var _map = function( app, verb, path, controller, action ) {
     var allowedVerbs = [ 'get', 'post', 'put', 'delete' ],
         verb         = verb.toLowerCase(),
         con;
@@ -54,7 +68,7 @@ var hopkick = (function() {
       throw new Error( 'Invalid HTTP verb: ' + verb );
     }
 
-    con = _loadFile( controller, this.config.controllers, this.config.postfix );
+    con = _loadFile( controller, config.controllers, config.postfix );
 
     if ( !con[action] ) {
       throw new Error( action + ' does not exist on ' + controller + 'Controller' );
@@ -64,16 +78,6 @@ var hopkick = (function() {
   };
 
   return {
-    config: {
-      // Path where your controllers are stored in
-      controllers: './controllers/',
-
-      // Naming of your controller e.g. `UserController`
-      postfix: 'Controller',
-
-      // Location of your route map
-      routes: './config/routes'
-    },
 
     /*
       Initializes the router with configuration options
@@ -82,18 +86,20 @@ var hopkick = (function() {
     */
 
     init: function( opts ) {
-      this.config = opts ? utils.merge( this.config, opts ) : this.config;
+      config = opts ? utils.merge( config, opts ) : config;
     },
 
     /*
       Mounts the router onto the route map specified
+
+      @param {Object} - Express application
     */
 
-    mount: function() {
+    mount: function( app ) {
       var routeMap, route, handler, method, controllerName, actionName;
 
       try {
-        routeMap = require( this.config.routes );
+        routeMap = require( config.routes );
       } catch ( e ) {
         throw new Error( 'Route map not found!' );
       }
@@ -107,7 +113,7 @@ var hopkick = (function() {
           actionName = handler[method].split( '#' )[1] ?
               handler[method].split( '#' )[1] : 'index';
 
-          _map( method, route, controllerName, actionName );
+          _map( app, method, route, controllerName, actionName );
         }
       }
     },
