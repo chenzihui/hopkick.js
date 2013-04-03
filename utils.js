@@ -19,3 +19,15 @@ module.exports.merge = function( objA, objB ) {
 
   return objA;
 };
+
+/*
+  Checks if a given object is a function. Taken from Underscore's implementation
+
+  @param {Object}
+
+  @return {Boolean}
+*/
+
+module.exports.isFunction = function(obj) {
+  return !!( obj && obj.constructor && obj.call && obj.apply );
+};

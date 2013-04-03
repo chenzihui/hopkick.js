@@ -77,16 +77,26 @@ var hopkick = (function() {
       throw new Error( 'Route map not found!' );
     }
 
+    // TODO: Abstract this portion out
+
     for ( route in routeMap ) {
       handler = routeMap[ route ];
 
       for ( method in handler ) {
-        controllerName = handler[method].split( '#' )[0];
+        if ( utils.isFunction( handler[method] ) ) {
 
-        actionName = handler[method].split( '#' )[1] ?
-            handler[method].split( '#' )[1] : 'index';
+          // Do the mapping directly
+          app[method]( route, handler[method] );
+        } else {
 
-        this.map( app, method, route, controllerName, actionName );
+          // Parse the string and apply mapping
+          controllerName = handler[method].split( '#' )[0];
+
+          actionName = handler[method].split( '#' )[1] ?
+              handler[method].split( '#' )[1] : 'index';
+
+          this.map( app, method, route, controllerName, actionName );
+        }
       }
     }
   };

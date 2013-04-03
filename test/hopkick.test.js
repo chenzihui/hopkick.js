@@ -1,5 +1,3 @@
-// TODO: Clean up the tests!
-
 var should  = require( 'should' ),
     assert  = require( 'assert' ),
     express = require( 'express' ),
@@ -102,10 +100,10 @@ describe( '.init()', function() {
 });
 
 describe( '.mount()', function() {
-  var app = express();
 
   it( 'should throw an error when the route map is not found', function() {
-    var hopkick = require( '../hopkick' );
+    var hopkick = require( '../hopkick' ),
+        app     = express();
 
     hopkick.init({
       controllers: './example/controllers',
@@ -119,7 +117,8 @@ describe( '.mount()', function() {
   });
 
   it( 'should be populated with routes', function() {
-    var hopkick = require( '../hopkick' );
+    var hopkick = require( '../hopkick' ),
+        app     = express();
 
     hopkick.init({
       controllers: './example/controllers/',
@@ -144,6 +143,25 @@ describe( '.mount()', function() {
 
     post[0].path.should.equal( '/user' );
     post[0].method.should.equal( 'post' );
+  });
+
+  it( 'should accept functions as route handlers', function() {
+    var hopkick = require( '../hopkick' ),
+        app     = express();
+
+    hopkick.init({
+      controllers: './example/controllers/',
+      postfix: 'Controller',
+      routes: './example/config/routesFunc'
+    });
+
+    hopkick.mount( app );
+
+    var get = app.routes.get;
+
+    get.should.have.length( 1 );
+    get[0].path.should.equal( '/' );
+    get[0].method.should.equal( 'get' );
   });
 
 });
