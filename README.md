@@ -30,7 +30,5 @@ We can now express our routes as
       }
     };
 
-# TODO
+# Still under heavy development
 ------------------------------
-
-This project is an exploration into Test Driven Development. The API interface will be constantly revised until it hits v1.0
