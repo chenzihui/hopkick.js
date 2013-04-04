@@ -115,10 +115,12 @@ var hopkick = (function( undefined ) {
   */
 
   var mount = function( app ) {
-    var routeMap, route, handler, method, controllerName, actionName;
+    var routeMap, route, handler, method, controllerName, actionName, fullPath;
+
+    fullPath = path.resolve( __dirname + _config.routes );
 
     try {
-      routeMap = require( this.config.routes );
+      routeMap = require( fullPath );
     } catch ( e ) {
       throw new Error( 'Route map not found!' );
     }

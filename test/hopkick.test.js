@@ -125,72 +125,78 @@ describe( '.map()', function() {
 
 });
 
-// describe( '.mount()', function() {
+describe( '.mount()', function() {
 
-//   it( 'should throw an error when the route map is not found', function() {
-//     var hopkick = require( '../hopkick' ),
-//         app     = express();
+  it( 'should throw an error when the route map is not found', function() {
+    var hopkick = require( '../hopkick' ),
+        app     = express();
 
-//     hopkick.init({
-//       controllers: './example/controllers',
-//       postfix: 'Controller',
-//       routes: './example/router'
-//     });
+    hopkick.init({
+      hopkick: {
+        controllers: '/example/controllers',
+        postfix: 'Controller',
+        routes: '/example/router'
+      }
+    });
 
-//     (function() {
-//       hopkick.mount( app );
-//     }).should.throwError( 'Route map not found!' );
-//   });
+    (function() {
+      hopkick.mount( app );
+    }).should.throwError( 'Route map not found!' );
+  });
 
-//   it( 'should be populated with routes', function() {
-//     var hopkick = require( '../hopkick' ),
-//         app     = express();
+  it( 'should be populated with routes', function() {
+    var hopkick = require( '../hopkick' ),
+        app     = express();
 
-//     hopkick.init({
-//       controllers: './example/controllers/',
-//       postfix: 'Controller',
-//       routes: './example/config/routes'
-//     });
+    hopkick.init({
+      hopkick: {
+        controllers: '/example/controllers',
+        postfix: 'Controller',
+        routes: '/example/config/routes'
+      }
+    });
 
-//     hopkick.mount( app );
+    hopkick.mount( app );
 
-//     var get  = app.routes.get,
-//         post = app.routes.post;
+    var get  = app.routes.get,
+        post = app.routes.post;
 
-//     get.should.have.length( 2 );
+    get.should.have.length( 2 );
 
-//     get[0].path.should.equal( '/' );
-//     get[0].method.should.equal( 'get' );
+    get[0].path.should.equal( '/' );
+    get[0].method.should.equal( 'get' );
 
-//     get[1].path.should.equal( '/user' );
-//     get[1].method.should.equal( 'get' );
+    get[1].path.should.equal( '/user' );
+    get[1].method.should.equal( 'get' );
 
-//     post.should.have.length( 1 );
+    post.should.have.length( 1 );
 
-//     post[0].path.should.equal( '/user' );
-//     post[0].method.should.equal( 'post' );
-//   });
+    post[0].path.should.equal( '/user' );
+    post[0].method.should.equal( 'post' );
+  });
 
-//   it( 'should accept functions as route handlers', function() {
-//     var hopkick = require( '../hopkick' ),
-//         app     = express();
+  it( 'should accept functions as route handlers', function() {
+    var hopkick = require( '../hopkick' ),
+        app     = express();
 
-//     hopkick.init({
-//       controllers: './example/controllers/',
-//       postfix: 'Controller',
-//       routes: './example/config/routesFunc'
-//     });
+    hopkick.init({
+      hopkick: {
+        controllers: '/example/controllers',
+        postfix: 'Controller',
+        routes: '/example/config/routesFunc'
+      }
+    });
 
-//     hopkick.mount( app );
+    hopkick.mount( app );
 
-//     var get = app.routes.get;
+    var get = app.routes.get;
 
-//     get.should.have.length( 1 );
-//     get[0].path.should.equal( '/' );
-//     get[0].method.should.equal( 'get' );
-//   });
+    get.should.have.length( 1 );
+    get[0].path.should.equal( '/' );
+    get[0].method.should.equal( 'get' );
+  });
 
-// });
+});
 
 describe( 'Utilities', function() {
 
