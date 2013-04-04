@@ -1,83 +1,9 @@
 var should  = require( 'should' ),
     assert  = require( 'assert' ),
     express = require( 'express' ),
+    path    = require( 'path' ),
     utils   = require( '../lib/utils' ),
     hopkick = require( '../hopkick' );
-
-// describe( '.map()', function() {
-
-//   var verb       = 'push',
-//       controller = 'main',
-//       action     = 'createNew',
-//       path       = '/index';
-
-//   it( 'should throw an error when an invalid HTTP verb is provided', function() {
-//     var express = require( 'express' ),
-//         app     = express();
-
-//     (function() {
-//       hopkick.map( app, verb, path, controller, action );
-//     }).should.throwError( 'Invalid HTTP verb: push' );
-//   });
-
-//   it( 'should throw an error when it cannot load the controller specified', function() {
-//     var verb    = 'get',
-//         con     = controller + 'Controller',
-//         app     = express();
-
-//     var hopkick = require( '../hopkick' );
-
-//     hopkick.init({
-//       hopkick: {
-//         controllers: './example/controllers/',
-//         postfix: 'Controller',
-//         routes: './example/config/routes'
-//       }
-//     });
-
-//     (function() {
-//       hopkick.map( app, verb, path, controller, action );
-//     }).should.throwError( 'Cannot load controller ' + con + ' from ./example/controllers/' );
-//   });
-
-//   it( 'should throw an error when the action does not exist on the controller', function() {
-//     var verb       = 'get',
-//         controller = 'user',
-//         app        = express();
-
-//     hopkick.init({
-//       hopkick: {
-//         controllers: './example/controllers/',
-//         postfix: 'Controller'
-//       }
-//     });
-
-//     (function() {
-//       hopkick.map( app, verb, path, controller, action );
-//     }).should.throwError( action + ' does not exist on ' + controller + 'Controller' );
-//   });
-
-//   it( 'should map a route to a controller\'s action', function() {
-//     var hopkick = require( '../hopkick' ),
-//         app     = express();
-
-//     hopkick.init({
-//       hopkick: {
-//         controllers: './example/controllers/',
-//         postfix: 'Controller',
-//         routes: './example/config/routes'
-//       }
-//     });
-
-//     hopkick.map( app, 'get', '/', 'user', 'index' );
-
-//     var routes = app.routes.get;
-
-//     routes[0].path.should.equal( '/' );
-//     routes[0].method.should.equal( 'get' );
-//   });
-
-// });
 
 describe( '.init()', function() {
 
@@ -86,9 +12,9 @@ describe( '.init()', function() {
     host: 'localhost',
 
     hopkick: {
-      controllersPath: 'app/controllers',
+      controllersPath: '/app/controllers',
       controllerPostfix: 'Controller',
-      routeMap: 'lib/routes'
+      routeMap: '/lib/routes'
     }
   };
 
@@ -120,6 +46,81 @@ describe( '.init()', function() {
     hopkick.init( config );
 
     should.not.exist( hopkick.config );
+  });
+
+});
+
+describe( '.map()', function() {
+  var verb       = 'push',
+      controller = 'main',
+      action     = 'createNew',
+      route       = '/index';
+
+  it( 'should throw an error when an invalid HTTP verb is provided', function() {
+    var app = express();
+
+    (function() {
+      hopkick.map( app, verb, route, controller, action );
+    }).should.throwError( 'Invalid HTTP verb: push' );
+  });
+
+  it( 'should throw an error when it cannot load the controller specified', function() {
+    var verb = 'get',
+        app  = express(),
+        loc;
+
+    var hopkick = require( '../hopkick' );
+
+    hopkick.init({
+      hopkick: {
+        controllersPath: '/example/controllers',
+        controllerPostfix: 'Controller',
+        routeMap: '/example/config/routes'
+      }
+    });
+
+    loc = path.resolve( __dirname + '/../' + hopkick._config.controllersPath );
+
+    (function() {
+      hopkick.map( app, verb, route, controller, action );
+    }).should.throwError( 'Cannot load controller ' + controller + ' from ' + loc );
+  });
+
+  it( 'should throw an error when the action does not exist on the controller', function() {
+    var verb       = 'get',
+        controller = 'user',
+        app        = express();
+
+    hopkick.init({
+      hopkick: {
+        controllersPath: '/example/controllers',
+        controllerPostfix: 'Controller'
+      }
+    });
+
+    (function() {
+      hopkick.map( app, verb, route, controller, action );
+    }).should.throwError( action + ' does not exist on ' + controller + 'Controller' );
+  });
+
+  it( 'should map a route to a controller\'s action', function() {
+    var hopkick = require( '../hopkick' ),
+        app     = express();
+
+    hopkick.init({
+      hopkick: {
+        controllersPath: '/example/controllers',
+        controllerPostfix: 'Controller',
+        routeMap: '/example/config/routes'
+      }
+    });
+
+    hopkick.map( app, 'get', '/', 'user', 'index' );
+
+    var routes = app.routes.get;
+
+    routes[0].path.should.equal( '/' );
+    routes[0].method.should.equal( 'get' );
   });
 
 });

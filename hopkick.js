@@ -1,23 +1,31 @@
-/**
- * Hopkick.js - A simple router built on top of Express.js
- *
- * Example usage:
- *
- * var express = require( 'express' ),
- *     hopkick = require( 'hopkick' ),
- *     config  = require( './lib/config' ),  // Configuration file for your app
- *     app     = express();
- *
- * // Initialize the router
- * hopkick.init( config );
- *
- * // Mount your application routes
- * hopkick.mount( app );
- *
- * Author: Chen Zihui <hello@chenzihui.com>
- **/
+/*
 
-var utils   = require( './lib/utils' );
+  Hopkick.js - A simple router built on top of Express.js
+
+  Example usage:
+
+  var express = require( 'express' ),
+      hopkick = require( 'hopkick' ),
+      config  = require( './lib/config' ),  // Configuration file for your app
+      app     = express();
+
+  // Initialize the router
+  hopkick.init( config );
+
+  // Mount your application routes
+  hopkick.mount( app );
+
+  Author: Chen Zihui <hello@chenzihui.com>
+
+*/
+
+// Module dependencies
+var utils = require( './lib/utils' ),
+    path  = require( 'path' );
+
+/*
+  Hopkick module definition
+*/
 
 var hopkick = (function( undefined ) {
 
@@ -32,20 +40,20 @@ var hopkick = (function( undefined ) {
     TODO: Can be expanded to load other types of files. E.g. `models`
 
     @param {String} - Name of controller
-    @param {String} - Path
-    @param {String} - Postfix of file
 
     @returns {Object}
   */
 
-  var _loadFile = function( name, path, postfix ) {
-    var fullname = name + postfix,
-        controller;
+  var _loadFile = function( name ) {
+    var cPath = path.resolve( __dirname + _config.controllersPath ),
+        fileRequest, controller;
+
+    fileRequest = cPath + '/' + name + _config.controllerPostfix;
 
     try {
-      controller = require( path + fullname );
+      controller = require( fileRequest );
     } catch ( e ) {
-      throw new Error( 'Cannot load controller ' + fullname + ' from ' + path );
+      throw new Error( 'Cannot load controller ' + name + ' from ' + cPath );
     }
 
     return controller;
@@ -81,7 +89,7 @@ var hopkick = (function( undefined ) {
     @return none
   */
 
-  var map = function( app, verb, path, controller, action ) {
+  var map = function( app, verb, route, controller, action ) {
     var allowedVerbs = [ 'get', 'post', 'put', 'delete' ],
         verb         = verb.toLowerCase(),
         con;
@@ -90,13 +98,14 @@ var hopkick = (function( undefined ) {
       throw new Error( 'Invalid HTTP verb: ' + verb );
     }
 
-    con = _loadFile( controller, this.config.controllers, this.config.postfix );
+    con = _loadFile( controller );
 
     if ( !con[action] ) {
-      throw new Error( action + ' does not exist on ' + controller + 'Controller' );
+      throw new Error( action + ' does not exist on ' + controller +
+          'Controller' );
     }
 
-    app[verb]( path, con[action] );
+    app[verb]( route, con[action] );
   };
 
   /*
