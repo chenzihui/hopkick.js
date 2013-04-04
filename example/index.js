@@ -1,12 +1,9 @@
 var express = require( 'express' ),
     hopkick = require( '../hopkick' ),
+    config  = require( '../lib/config' ),
     app     = express();
 
-hopkick.init({
-  controllers: './example/controllers/',
-  postfix: 'Controller',
-  routes: './example/config/routes'
-});
+hopkick.init( config );
 
 hopkick.mount( app );
 

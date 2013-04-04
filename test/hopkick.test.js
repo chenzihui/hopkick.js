@@ -135,7 +135,7 @@ describe( '.mount()', function() {
       hopkick: {
         controllers: '/example/controllers',
         postfix: 'Controller',
-        routes: '/example/router'
+        routeMap: '/example/router'
       }
     });
 
@@ -152,7 +152,7 @@ describe( '.mount()', function() {
       hopkick: {
         controllers: '/example/controllers',
         postfix: 'Controller',
-        routes: '/example/config/routes'
+        routeMap: '/example/config/routes'
       }
     });
 
@@ -183,7 +183,7 @@ describe( '.mount()', function() {
       hopkick: {
         controllers: '/example/controllers',
         postfix: 'Controller',
-        routes: '/example/config/routesFunc'
+        routeMap: '/example/config/routesFunc'
       }
     });
 

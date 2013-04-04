@@ -117,7 +117,7 @@ var hopkick = (function( undefined ) {
   var mount = function( app ) {
     var routeMap, route, handler, method, controllerName, actionName, fullPath;
 
-    fullPath = path.resolve( __dirname + _config.routes );
+    fullPath = path.resolve( __dirname + _config.routeMap );
 
     try {
       routeMap = require( fullPath );
