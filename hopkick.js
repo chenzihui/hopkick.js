@@ -1,12 +1,31 @@
 /**
  * Hopkick.js - A simple router built on top of Express.js
  *
+ * Example usage:
+ *
+ * var express = require( 'express' ),
+ *     hopkick = require( 'hopkick' ),
+ *     config  = require( './lib/config' ),  // Configuration file for your app
+ *     app     = express();
+ *
+ * // Initialize the router
+ * hopkick.init( config );
+ *
+ * // Mount your application routes
+ * hopkick.mount( app );
+ *
  * Author: Chen Zihui <hello@chenzihui.com>
  **/
 
-var utils   = require( './utils' );
+var utils   = require( './lib/utils' );
 
-var hopkick = (function() {
+var hopkick = (function( undefined ) {
+
+  /*
+    Private variable to store the configuration options
+  */
+
+  var _config = {};
 
   /*
     Loads a controller from the specified path
@@ -30,6 +49,24 @@ var hopkick = (function() {
     }
 
     return controller;
+  };
+
+  /*
+    Initializes the router with your configuration options
+
+    @param {Object}
+  */
+
+  var init = function( opts ) {
+    if ( !opts ) {
+      throw new Error( 'Config object not passed into init method' );
+    }
+
+    if ( opts.hopkick === undefined ) {
+      throw new Error( 'Cannot find Hopkick configuration options' );
+    }
+
+    utils.merge( _config, opts.hopkick );
   };
 
   /*
@@ -103,43 +140,20 @@ var hopkick = (function() {
 
   return {
 
-    config: {},
-
-    /*
-      Initializes the router with configuration options
-
-      @param {Object}
-
-      Example usage:
-
-      hopkick.init({
-        // Path to controllers
-        controllers: './app/controllers/',
-
-        // Postfix for controller files
-        postfix: 'Controller',
-
-        // Path to route map
-        routes: './app/routes'
-      });
-    */
-
-    init: function( opts ) {
-      if ( !opts ) {
-        throw new Error( 'Config object not passed into init method' );
-      }
-
-      this.config = opts;
-    },
-
     /*
       Public API
     */
 
+    init: init,
     map: map,
-    mount:mount
+    mount:mount,
+
+    /*
+      Private API (For tests only)
+    */
+    _config: _config
   };
 
-})();
+})( undefined );
 
 module.exports = hopkick;
